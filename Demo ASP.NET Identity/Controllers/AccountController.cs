@@ -86,7 +86,7 @@ namespace Demo_ASP.NET_Identity.Controllers
                     return RedirectToAction("SendCode", new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
                 case SignInStatus.Failure:
                 default:
-                    ModelState.AddModelError("", "Invalid login attempt.");
+                    ModelState.AddModelError("", "Email hoặc mật khẩu không chính xác.");
                     return View(model);
             }
         }
@@ -156,14 +156,15 @@ namespace Demo_ASP.NET_Identity.Controllers
                 if (result.Succeeded)
                 {
                     await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
-                    
+
                     // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
                     // Send an email with this link
-                    // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
-                    // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
-                    // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
+                    string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
+                    var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
+                    await UserManager.SendEmailAsync(user.Id, "Xác thực tài khoản của bạn", "Vui lòng click vào <a href=\"" + callbackUrl + "\">đây</a> để thực hiện việc xác thực");
 
-                    return RedirectToAction("Index", "Home");
+                    ViewBag.Message = "Chúng tôi đã gửi Email cho việc xác thực tài khoản đến Email của bạn. Kiểm tra Email của bạn để thực hiện xác thực.";
+                    return View(model);
                 }
                 AddErrors(result);
             }

@@ -10,6 +10,8 @@ using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
+using System.Net.Mail;
+using System.Net;
 using Demo_ASP.NET_Identity.Models;
 
 namespace Demo_ASP.NET_Identity
@@ -18,7 +20,29 @@ namespace Demo_ASP.NET_Identity
     {
         public Task SendAsync(IdentityMessage message)
         {
-            // Plug in your email service here to send an email.
+            var client = new SmtpClient
+            {
+                Host = "smtp.gmail.com",
+                Port = 578,
+                UseDefaultCredentials = false,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                Credentials = new NetworkCredential("davisno99@gmail.com", "01699912344"),
+                EnableSsl = true
+            };
+
+            var from = new MailAddress("davisno99@gmail.com", "Test Identity");
+            var to = new MailAddress(message.Destination);
+
+            var mail = new MailMessage(from, to)
+            {
+                Subject = message.Subject,
+                Body = message.Body,
+                From = from,
+                IsBodyHtml = true,
+            }; 
+
+            client.Send(mail);
+
             return Task.FromResult(0);
         }
     }
@@ -54,10 +78,10 @@ namespace Demo_ASP.NET_Identity
             manager.PasswordValidator = new PasswordValidator
             {
                 RequiredLength = 6,
-                RequireNonLetterOrDigit = true,
+                RequireNonLetterOrDigit = false,
                 RequireDigit = true,
-                RequireLowercase = true,
-                RequireUppercase = true,
+                RequireLowercase = false,
+                RequireUppercase = false,
             };
 
             // Configure user lockout defaults
